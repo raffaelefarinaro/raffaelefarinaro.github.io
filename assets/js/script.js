@@ -262,7 +262,12 @@ function animate() {
 function handleInput(e, isClick) {
     let cx, cy;
 
-    if (e.type.includes('touch')) {
+    if (e.type === 'touchend') {
+        // For touchend, use changedTouches because touches is empty
+        cx = e.changedTouches[0].clientX;
+        cy = e.changedTouches[0].clientY;
+    } else if (e.type.includes('touch')) {
+        // touchstart / touchmove
         cx = e.touches[0].clientX;
         cy = e.touches[0].clientY;
     } else {
@@ -273,9 +278,15 @@ function handleInput(e, isClick) {
     mouse.x = cx;
     mouse.y = cy;
 
+    // isClick is true for mousedown and touchend
     if (isClick && !isUnlocked) {
+        // Prevent default on touchend to avoid ghost mouse clicks
+        if (e.type === 'touchend') {
+            e.preventDefault();
+        }
+
         let hit = false;
-        // Priority 1: Clik on a Face
+        // Priority 1: Click on a Face
         for (let i = heads.length - 1; i >= 0; i--) {
             if (heads[i].isHit(cx, cy)) {
                 explode(heads[i]);
@@ -340,11 +351,13 @@ window.addEventListener('scroll', updateButtonPositions); // Scroll might shift 
 window.addEventListener('mousemove', e => handleInput(e, false));
 window.addEventListener('mousedown', e => handleInput(e, true));
 window.addEventListener('touchmove', e => {
-    e.preventDefault();
+    // Prevent scrolling or zooming while playing
+    if (!isUnlocked) e.preventDefault();
     handleInput(e, false);
 }, { passive: false });
-window.addEventListener('touchstart', e => {
+// Switch to touchend for clicking
+window.addEventListener('touchend', e => {
     handleInput(e, true);
-});
+}, { passive: false });
 
 init();
