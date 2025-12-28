@@ -85,7 +85,7 @@ html {
     /* We rely on the canvas click handler to delegate clicks to these if missed */
 }
 
-.pixel-btn:hover {
+.pixel-btn:not(.is-locked):hover {
     transform: translate(2px, 2px);
     background-color: #f39c12;
     box-shadow:
@@ -103,6 +103,7 @@ html {
     touch-action: none;
     cursor: none;
     /* Hide default cursor for custom one */
+    pointer-events: none;
 }
 
 /* Locked state for buttons covered by faces */
