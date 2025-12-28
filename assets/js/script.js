@@ -4,6 +4,7 @@ const ui = document.getElementById('ui');
 
 const HEAD_SIZE = 48;
 const GRID_SPACING = 80;
+const MAX_HEADS = 100;
 
 let heads = [];
 let particles = [];
@@ -149,18 +150,21 @@ function createGrid() {
     if (isUnlocked) return;
 
     heads = [];
-    const cols = Math.ceil(canvas.width / GRID_SPACING);
-    const rows = Math.ceil(canvas.height / GRID_SPACING);
+    const area = canvas.width * canvas.height;
+    const maxSpacing = Math.sqrt(area / MAX_HEADS);
+    const spacing = Math.max(GRID_SPACING, maxSpacing);
+    const cols = Math.ceil(canvas.width / spacing);
+    const rows = Math.ceil(canvas.height / spacing);
 
-    const offsetX = (canvas.width - (cols * GRID_SPACING)) / 2 + (GRID_SPACING / 2) - (HEAD_SIZE / 2);
-    const offsetY = (canvas.height - (rows * GRID_SPACING)) / 2 + (GRID_SPACING / 2) - (HEAD_SIZE / 2);
+    const offsetX = (canvas.width - (cols * spacing)) / 2 + (spacing / 2) - (HEAD_SIZE / 2);
+    const offsetY = (canvas.height - (rows * spacing)) / 2 + (spacing / 2) - (HEAD_SIZE / 2);
 
     for (let r = 0; r < rows; r++) {
         for (let c = 0; c < cols; c++) {
-            const x = offsetX + c * GRID_SPACING;
-            const y = offsetY + r * GRID_SPACING;
+            const x = offsetX + c * spacing;
+            const y = offsetY + r * spacing;
 
-            if (x > -GRID_SPACING && x < canvas.width && y > -GRID_SPACING && y < canvas.height) {
+            if (x > -spacing && x < canvas.width && y > -spacing && y < canvas.height) {
                 heads.push(new Head(x, y));
             }
         }
