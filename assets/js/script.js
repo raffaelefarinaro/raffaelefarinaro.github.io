@@ -10,13 +10,19 @@ const EXPLOSION_RADIUS = HEAD_SIZE * 2.2;
 let heads = [];
 let particles = [];
 let clickEffects = [];
+let slices = [];
 let cursorTrail = []; // Stores {x, y, life}
 let mouse = { x: window.innerWidth / 2, y: window.innerHeight / 2 };
+let prevMouse = { x: window.innerWidth / 2, y: window.innerHeight / 2 };
 let audioCtx = null;
 let isUnlocked = false;
 
 let scareTimer = 0;
 const SCARE_DURATION = 40;
+const SLICE_INTERVAL = 60;
+let pointerDown = false;
+let lastSliceTime = 0;
+let hadSliceSinceDown = false;
 
 const colors = [null, '#111111', '#ffccaa', '#ffffff', '#333333'];
 
@@ -62,6 +68,30 @@ function playExplosionSound() {
     } catch (e) { }
 }
 
+function playSliceSound() {
+    try {
+        if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+        if (audioCtx.state === 'suspended') audioCtx.resume();
+
+        const now = audioCtx.currentTime;
+        const osc = audioCtx.createOscillator();
+        const gain = audioCtx.createGain();
+
+        osc.type = 'triangle';
+        osc.frequency.setValueAtTime(1200, now);
+        osc.frequency.exponentialRampToValueAtTime(180, now + 0.12);
+
+        gain.gain.setValueAtTime(0.001, now);
+        gain.gain.linearRampToValueAtTime(0.25, now + 0.02);
+        gain.gain.exponentialRampToValueAtTime(0.0001, now + 0.18);
+
+        osc.connect(gain);
+        gain.connect(audioCtx.destination);
+
+        osc.start(now);
+        osc.stop(now + 0.2);
+    } catch (e) { }
+}
 class Head {
     constructor(x, y) {
         this.size = HEAD_SIZE;
@@ -178,6 +208,58 @@ class ClickEffect {
         ctx.strokeStyle = `rgba(255, 200, 80, ${this.life})`;
         ctx.lineWidth = 2;
         ctx.stroke();
+    }
+}
+
+class SlicePiece {
+    constructor(cx, cy, size, faceAngle, sliceAngle, side) {
+        this.cx = cx;
+        this.cy = cy;
+        this.size = size;
+        this.faceAngle = faceAngle;
+        this.sliceAngle = sliceAngle;
+        this.side = side;
+        this.life = 1.0;
+
+        const normal = sliceAngle + Math.PI / 2;
+        const speed = 3 + Math.random() * 2;
+        this.vx = Math.cos(normal) * speed * side + (Math.random() - 0.5) * 1.2;
+        this.vy = Math.sin(normal) * speed * side + 1.2;
+        this.rot = (Math.random() * 0.4 + 0.2) * side;
+    }
+
+    update() {
+        this.cx += this.vx;
+        this.cy += this.vy;
+        this.rot += 0.02 * this.side;
+        this.life -= 0.02;
+    }
+
+    draw() {
+        const img = (scareTimer > 0) ? scaredImage : headImage;
+        if (!img.complete) return;
+
+        ctx.save();
+        ctx.globalAlpha = Math.max(0, this.life);
+        ctx.translate(this.cx, this.cy);
+        ctx.rotate(this.faceAngle + this.rot);
+
+        const sliceAngleRel = this.sliceAngle - this.faceAngle;
+        ctx.rotate(sliceAngleRel);
+        ctx.beginPath();
+        if (this.side > 0) {
+            ctx.rect(-this.size, 0, this.size * 2, this.size);
+        } else {
+            ctx.rect(-this.size, -this.size, this.size * 2, this.size);
+        }
+        ctx.clip();
+        ctx.rotate(-sliceAngleRel);
+
+        ctx.imageSmoothingEnabled = false;
+        ctx.drawImage(img, -this.size / 2, -this.size / 2, this.size, this.size);
+
+        ctx.restore();
+        ctx.globalAlpha = 1.0;
     }
 }
 
@@ -308,12 +390,21 @@ function animate() {
         }
     }
 
+    for (let i = slices.length - 1; i >= 0; i--) {
+        slices[i].update();
+        slices[i].draw();
+        if (slices[i].life <= 0) {
+            slices.splice(i, 1);
+        }
+    }
+
     drawCursor();
 
     requestAnimationFrame(animate);
 }
 
 function handleInput(e, isClick) {
+    const now = performance.now();
     let cx, cy;
 
     if (e.type === 'touchend') {
@@ -329,11 +420,16 @@ function handleInput(e, isClick) {
         cy = e.clientY;
     }
 
+    prevMouse.x = mouse.x;
+    prevMouse.y = mouse.y;
     mouse.x = cx;
     mouse.y = cy;
 
     // isClick is true for mousedown and touchend
     if (isClick && !isUnlocked) {
+        if (hadSliceSinceDown) {
+            return;
+        }
         // Prevent default on touchend to avoid ghost mouse clicks
         if (e.type === 'touchend') {
             e.preventDefault();
@@ -370,6 +466,26 @@ function handleInput(e, isClick) {
         }
 
         checkWinCondition();
+    }
+
+    if (pointerDown && !isClick && !isUnlocked) {
+        const dx = mouse.x - prevMouse.x;
+        const dy = mouse.y - prevMouse.y;
+        const moveDist = Math.hypot(dx, dy);
+        if (moveDist > 2 && now - lastSliceTime >= SLICE_INTERVAL) {
+            for (let i = heads.length - 1; i >= 0; i--) {
+                if (heads[i].isHit(cx, cy)) {
+                    const sliceAngle = Math.atan2(dy, dx);
+                    triggerSlice(heads[i], sliceAngle);
+                    playSliceSound();
+                    scareTimer = SCARE_DURATION;
+                    lastSliceTime = now;
+                    hadSliceSinceDown = true;
+                    break;
+                }
+            }
+            checkWinCondition();
+        }
     }
 }
 
@@ -427,10 +543,39 @@ function triggerExplosion(head) {
     removed.forEach(explode);
 }
 
+function triggerSlice(head, sliceAngle) {
+    const centerX = head.x + head.size / 2;
+    const centerY = head.y + head.size / 2;
+    const faceAngle = Math.atan2(mouse.y - centerY, mouse.x - centerX);
+
+    const index = heads.indexOf(head);
+    if (index !== -1) {
+        heads.splice(index, 1);
+    }
+
+    slices.push(new SlicePiece(centerX, centerY, head.size, faceAngle, sliceAngle, 1));
+    slices.push(new SlicePiece(centerX, centerY, head.size, faceAngle, sliceAngle, -1));
+}
+
 window.addEventListener('resize', resize);
 window.addEventListener('scroll', updateButtonPositions); // Scroll might shift relative positions
 window.addEventListener('mousemove', e => handleInput(e, false));
-window.addEventListener('mousedown', e => handleInput(e, true));
+window.addEventListener('mousedown', e => {
+    pointerDown = true;
+    hadSliceSinceDown = false;
+    handleInput(e, true);
+});
+window.addEventListener('mouseup', () => {
+    pointerDown = false;
+});
+window.addEventListener('mouseleave', () => {
+    pointerDown = false;
+});
+window.addEventListener('touchstart', e => {
+    pointerDown = true;
+    hadSliceSinceDown = false;
+    handleInput(e, false);
+}, { passive: false });
 window.addEventListener('touchmove', e => {
     // Prevent scrolling or zooming while playing
     if (!isUnlocked) e.preventDefault();
@@ -438,7 +583,11 @@ window.addEventListener('touchmove', e => {
 }, { passive: false });
 // Switch to touchend for clicking
 window.addEventListener('touchend', e => {
+    pointerDown = false;
     handleInput(e, true);
 }, { passive: false });
+window.addEventListener('touchcancel', () => {
+    pointerDown = false;
+}, { passive: true });
 
 init();
