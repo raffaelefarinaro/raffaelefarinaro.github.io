@@ -23,6 +23,8 @@ const SLICE_INTERVAL = 60;
 let pointerDown = false;
 let lastSliceTime = 0;
 let hadSliceSinceDown = false;
+let touchStart = null;
+const SWIPE_THRESHOLD = 18;
 
 const colors = [null, '#111111', '#ffccaa', '#ffffff', '#333333'];
 
@@ -469,22 +471,36 @@ function handleInput(e, isClick) {
     }
 
     if (pointerDown && !isClick && !isUnlocked) {
-        const dx = mouse.x - prevMouse.x;
-        const dy = mouse.y - prevMouse.y;
-        const moveDist = Math.hypot(dx, dy);
-        if (moveDist > 2 && now - lastSliceTime >= SLICE_INTERVAL) {
-            for (let i = heads.length - 1; i >= 0; i--) {
-                if (heads[i].isHit(cx, cy)) {
-                    const sliceAngle = Math.atan2(dy, dx);
-                    triggerSlice(heads[i], sliceAngle);
-                    playSliceSound();
-                    scareTimer = SCARE_DURATION;
-                    lastSliceTime = now;
-                    hadSliceSinceDown = true;
-                    break;
+        let allowSlice = true;
+        if (e.type.includes('touch')) {
+            if (!touchStart) {
+                allowSlice = false;
+            } else {
+                const distFromStart = Math.hypot(mouse.x - touchStart.x, mouse.y - touchStart.y);
+                if (distFromStart < SWIPE_THRESHOLD) {
+                    allowSlice = false;
                 }
             }
-            checkWinCondition();
+        }
+
+        if (allowSlice) {
+            const dx = mouse.x - prevMouse.x;
+            const dy = mouse.y - prevMouse.y;
+            const moveDist = Math.hypot(dx, dy);
+            if (moveDist > 2 && now - lastSliceTime >= SLICE_INTERVAL) {
+                for (let i = heads.length - 1; i >= 0; i--) {
+                    if (heads[i].isHit(cx, cy)) {
+                        const sliceAngle = Math.atan2(dy, dx);
+                        triggerSlice(heads[i], sliceAngle);
+                        playSliceSound();
+                        scareTimer = SCARE_DURATION;
+                        lastSliceTime = now;
+                        hadSliceSinceDown = true;
+                        break;
+                    }
+                }
+                checkWinCondition();
+            }
         }
     }
 }
@@ -574,6 +590,11 @@ window.addEventListener('mouseleave', () => {
 window.addEventListener('touchstart', e => {
     pointerDown = true;
     hadSliceSinceDown = false;
+    touchStart = {
+        x: e.touches[0].clientX,
+        y: e.touches[0].clientY,
+        time: performance.now()
+    };
     handleInput(e, false);
 }, { passive: false });
 window.addEventListener('touchmove', e => {
@@ -584,10 +605,12 @@ window.addEventListener('touchmove', e => {
 // Switch to touchend for clicking
 window.addEventListener('touchend', e => {
     pointerDown = false;
+    touchStart = null;
     handleInput(e, true);
 }, { passive: false });
 window.addEventListener('touchcancel', () => {
     pointerDown = false;
+    touchStart = null;
 }, { passive: true });
 
 init();
