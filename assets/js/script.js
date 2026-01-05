@@ -4,10 +4,12 @@ const ui = document.getElementById('ui');
 
 const HEAD_SIZE = 48;
 const GRID_SPACING = 80;
-const MAX_HEADS = 100;
+const TARGET_TAPS = 50;
+const EXPLOSION_RADIUS = HEAD_SIZE * 2.2;
 
 let heads = [];
 let particles = [];
+let clickEffects = [];
 let cursorTrail = []; // Stores {x, y, life}
 let mouse = { x: window.innerWidth / 2, y: window.innerHeight / 2 };
 let audioCtx = null;
@@ -139,6 +141,46 @@ class Particle {
     }
 }
 
+class ClickEffect {
+    constructor(x, y) {
+        this.x = x;
+        this.y = y;
+        this.life = 1.0;
+        this.radius = 10;
+    }
+
+    update() {
+        this.radius += 6;
+        this.life -= 0.06;
+    }
+
+    draw() {
+        const outerRadius = this.radius + 18;
+        const gradient = ctx.createRadialGradient(
+            this.x,
+            this.y,
+            this.radius * 0.2,
+            this.x,
+            this.y,
+            outerRadius
+        );
+        gradient.addColorStop(0, `rgba(255, 230, 120, ${this.life * 0.9})`);
+        gradient.addColorStop(0.6, `rgba(255, 120, 40, ${this.life * 0.8})`);
+        gradient.addColorStop(1, 'rgba(255, 60, 0, 0)');
+
+        ctx.beginPath();
+        ctx.arc(this.x, this.y, outerRadius, 0, Math.PI * 2);
+        ctx.fillStyle = gradient;
+        ctx.fill();
+
+        ctx.beginPath();
+        ctx.arc(this.x, this.y, this.radius, 0, Math.PI * 2);
+        ctx.strokeStyle = `rgba(255, 200, 80, ${this.life})`;
+        ctx.lineWidth = 2;
+        ctx.stroke();
+    }
+}
+
 function init() {
     resize();
     createGrid();
@@ -151,8 +193,8 @@ function createGrid() {
 
     heads = [];
     const area = canvas.width * canvas.height;
-    const maxSpacing = Math.sqrt(area / MAX_HEADS);
-    const spacing = Math.max(GRID_SPACING, maxSpacing);
+    const densityBoost = Math.sqrt(area / (TARGET_TAPS * 1.4));
+    const spacing = Math.min(GRID_SPACING, densityBoost);
     const cols = Math.ceil(canvas.width / spacing);
     const rows = Math.ceil(canvas.height / spacing);
 
@@ -258,6 +300,14 @@ function animate() {
         }
     }
 
+    for (let i = clickEffects.length - 1; i >= 0; i--) {
+        clickEffects[i].update();
+        clickEffects[i].draw();
+        if (clickEffects[i].life <= 0) {
+            clickEffects.splice(i, 1);
+        }
+    }
+
     drawCursor();
 
     requestAnimationFrame(animate);
@@ -293,8 +343,7 @@ function handleInput(e, isClick) {
         // Priority 1: Click on a Face
         for (let i = heads.length - 1; i >= 0; i--) {
             if (heads[i].isHit(cx, cy)) {
-                explode(heads[i]);
-                heads.splice(i, 1);
+                triggerExplosion(heads[i]);
                 playExplosionSound();
                 scareTimer = SCARE_DURATION;
                 hit = true;
@@ -348,6 +397,34 @@ function explode(head) {
         const c = colors[Math.floor(Math.random() * colors.length)];
         particles.push(new Particle(centerX, centerY, c || '#fff'));
     }
+}
+
+function triggerExplosion(head) {
+    const centerX = head.x + head.size / 2;
+    const centerY = head.y + head.size / 2;
+    clickEffects.push(new ClickEffect(centerX, centerY));
+
+    const removed = [];
+    for (let i = heads.length - 1; i >= 0; i--) {
+        const target = heads[i];
+        const tx = target.x + target.size / 2;
+        const ty = target.y + target.size / 2;
+        const dist = Math.hypot(tx - centerX, ty - centerY);
+        if (dist <= EXPLOSION_RADIUS) {
+            removed.push(target);
+            heads.splice(i, 1);
+        }
+    }
+
+    if (!removed.includes(head)) {
+        const index = heads.indexOf(head);
+        if (index !== -1) {
+            heads.splice(index, 1);
+        }
+        removed.push(head);
+    }
+
+    removed.forEach(explode);
 }
 
 window.addEventListener('resize', resize);
