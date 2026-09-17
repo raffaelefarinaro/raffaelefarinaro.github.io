@@ -518,7 +518,7 @@ function checkWinCondition() {
         // Remove locked classes
         buttons.forEach(b => b.element.classList.remove('is-locked'));
     } else {
-        ui.innerHTML = `TARGETS LEFT: ${heads.length}`;
+        const __tc = document.getElementById('targets-count'); if (__tc) { __tc.textContent = `TARGETS LEFT: ${heads.length}`; } else { ui.innerHTML = `TARGETS LEFT: ${heads.length}`; }
     }
 }
 

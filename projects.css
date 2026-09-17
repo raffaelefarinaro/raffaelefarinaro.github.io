@@ -1,0 +1,267 @@
+/* Projects section — pixel style matching style.css */
+
+:root {
+    --card-bg: rgba(0, 0, 0, 0.35);
+    --card-border: #ffffff;
+    --stat-color: #f1c40f;
+}
+
+body {
+    /* Allow scrolling to reach the projects section */
+    overflow-y: auto;
+    height: auto;
+    min-height: 100%;
+}
+
+html {
+    overflow-y: auto !important;
+}
+
+/* Prevent accidental text selection while slicing faces */
+#pixel-site,
+#projects,
+#ui,
+#win-banner {
+    -webkit-user-select: none;
+    user-select: none;
+    -webkit-touch-callout: none;
+}
+
+/* Hero fills one viewport, projects below */
+#pixel-site {
+    height: 100vh;
+    height: 100svh;
+}
+
+/* Projects section */
+.projects-section {
+    position: relative;
+    z-index: 1;
+    padding: 40px 20px 80px;
+    max-width: 1000px;
+    margin: 0 auto;
+    color: var(--text-color);
+    text-align: center;
+    text-shadow: 2px 2px 0px #000;
+}
+
+.projects-section.hidden {
+    display: none;
+}
+
+.projects-section h2 {
+    font-size: 20px;
+    color: var(--accent-color);
+    text-shadow: 4px 4px 0px #000;
+    margin-bottom: 30px;
+}
+
+.project-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 20px;
+}
+
+.project-card {
+    display: flex;
+    align-items: flex-start;
+    gap: 16px;
+    text-align: left;
+    background: var(--card-bg);
+    border: 3px solid var(--card-border);
+    box-shadow: 6px 6px 0px #000;
+    padding: 18px;
+    text-decoration: none;
+    color: var(--text-color);
+    transition: transform 0.1s, box-shadow 0.1s, background 0.1s;
+    pointer-events: auto;
+}
+
+.project-card:hover {
+    transform: translate(2px, 2px);
+    box-shadow: 3px 3px 0px #000;
+    background: rgba(0, 0, 0, 0.5);
+}
+
+.project-icon {
+    width: 56px;
+    height: 56px;
+    flex-shrink: 0;
+    image-rendering: pixelated;
+    border: 2px solid #000;
+    box-shadow: 3px 3px 0px #000;
+}
+
+.project-info h3 {
+    font-size: 14px;
+    color: var(--accent-color);
+    margin-bottom: 12px;
+}
+
+.project-info p {
+    font-size: 10px;
+    line-height: 1.8;
+    margin-bottom: 12px;
+    text-shadow: 1px 1px 0px #000;
+}
+
+.project-stat {
+    display: inline-block;
+    font-size: 10px;
+    color: #2ecc71;
+    background: rgba(0, 0, 0, 0.5);
+    padding: 6px 8px;
+    border: 2px solid #2ecc71;
+    box-shadow: 2px 2px 0px #000;
+    text-shadow: 1px 1px 0px #000;
+}
+
+.side-note {
+    margin-top: 30px;
+}
+
+.side-note p {
+    font-size: 8px;
+    line-height: 1.8;
+    opacity: 0.85;
+    max-width: 640px;
+    margin: 0 auto;
+}
+
+.game-hint {
+    margin-top: 30px;
+    font-size: 8px;
+    opacity: 0.6;
+    animation: blink 1.5s infinite;
+    text-shadow: 1px 1px 0px #000;
+}
+
+/* #ui banner with nuke: flex row layout */
+#ui.with-nuke {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-wrap: wrap;
+    gap: 18px;
+    line-height: 1.5;
+}
+
+#ui .ui-watch {
+    width: 100%;
+    font-size: 10px;
+}
+
+#ui .ui-text {
+    font-size: 10px;
+}
+
+#ui .ui-or {
+    font-size: 10px;
+    color: var(--accent-color);
+    text-shadow: 2px 2px 0 #000;
+}
+
+#ui .ui-count {
+    font-size: 10px;
+}
+
+/* Nuke button — lives inside the #ui banner box. Red "big button" style with pulse */
+#nuke-btn {
+    display: inline-block;
+    font-family: 'Press Start 2P', cursive;
+    font-size: 10px;
+    color: #fff;
+    background-color: #c0392b;
+    border: none;
+    padding: 10px 16px;
+    text-shadow: 2px 2px 0 #000;
+    box-shadow:
+        inset 2px 2px 0px 0px #e74c3c,
+        inset -2px -2px 0px 0px #922b21,
+        3px 3px 0px 0px #000;
+    cursor: pointer;
+    pointer-events: auto;
+    transition: transform 0.1s;
+    -webkit-user-select: none;
+    user-select: none;
+    animation: nuke-pulse 1.2s infinite alternate;
+}
+
+@keyframes nuke-pulse {
+    from {
+        box-shadow:
+            inset 2px 2px 0px 0px #e74c3c,
+            inset -2px -2px 0px 0px #922b21,
+            3px 3px 0px 0px #000,
+            0 0 0px 0px rgba(231, 76, 60, 0.0);
+    }
+    to {
+        box-shadow:
+            inset 2px 2px 0px 0px #e74c3c,
+            inset -2px -2px 0px 0px #922b21,
+            3px 3px 0px 0px #000,
+            0 0 14px 4px rgba(231, 76, 60, 0.55);
+    }
+}
+
+#nuke-btn:hover {
+    transform: translate(2px, 2px);
+    background-color: #e74c3c;
+    animation: none;
+}
+
+#nuke-btn:active {
+    transform: translate(4px, 4px);
+    box-shadow:
+        inset 2px 2px 0px 0px #922b21,
+        inset -2px -2px 0px 0px #c0392b,
+        1px 1px 0px 0px #000;
+    animation: none;
+}
+
+#nuke-btn.spent {
+    animation: nuke-shake 0.12s 4;
+}
+
+/* The #ui banner uses content-box sizing; on small screens make it border-box so
+   the nuke button fits without overflow */
+@media (max-width: 480px) {
+    #ui {
+        box-sizing: border-box;
+        padding: 10px 10px;
+        max-width: 92vw;
+    }
+}
+
+@keyframes nuke-shake {
+    0%, 100% { transform: translate(0, 0); }
+    25% { transform: translate(-3px, 1px); }
+    50% { transform: translate(3px, -1px); }
+    75% { transform: translate(-2px, -2px); }
+}
+
+@keyframes blink {
+    0%, 60% { opacity: 0.6; }
+    61%, 100% { opacity: 0.15; }
+}
+
+/* Canvas should not cover the projects section: keep it fixed to the hero only */
+#game-canvas {
+    position: absolute;
+    height: 100vh !important;
+    height: 100svh;
+    pointer-events: none;
+}
+
+/* The hero is its own scroll context for the game; the game JS measures canvas size.
+   Simplest robust approach: hero is position fixed-like block, projects flow below. */
+#pixel-site {
+    position: relative !important;
+}
+
+/* Mobile tweaks */
+@media (max-width: 480px) {
+    .projects-section h2 { font-size: 16px; }
+    .project-card { flex-direction: column; align-items: flex-start; }
+    .project-icon { width: 48px; height: 48px; }
+}
