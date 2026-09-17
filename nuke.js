@@ -181,8 +181,6 @@
             const ui = document.getElementById('ui');
             if (ui) {
                 ui.style.display = '';           // undo any hide
-                const tc = document.getElementById('targets-count');
-                if (tc) tc.textContent = '';     // clear "TARGETS LEFT"
                 const watch = ui.querySelector('.ui-watch');
                 if (watch) watch.textContent = 'RADIATION CLEARED.';
             }
@@ -246,12 +244,11 @@
         if (!ui) return;
         if (document.getElementById('nuke-btn')) return;
 
-        // Restructure the banner content: watching line, then text span + OR + button
+        // Restructure the banner content: watch/count line on top, then text + OR + button
         ui.innerHTML = '<div class="ui-watch">THEY ARE WATCHING...</div>' +
                        '<span class="ui-text">TAP / SLICE TO ELIMINATE</span>' +
                        '<span class="ui-or">OR</span>' +
-                       '<button id="nuke-btn" aria-label="Clear all faces instantly with a big explosion">NUKE</button>' +
-                       '<span id="targets-count" class="ui-count"></span>';
+                       '<button id="nuke-btn" aria-label="Clear all faces instantly with a big explosion">NUKE</button>';
         ui.classList.add('with-nuke');
 
         const btn = document.getElementById('nuke-btn');
