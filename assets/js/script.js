@@ -126,7 +126,15 @@ class Head {
 
         const img = (scareTimer > 0) ? scaredImage : headImage;
         if (img.complete) {
+            // Soft dark outline + faint light rim so the faces read against the
+            // darker background without losing the pixel look.
+            ctx.shadowColor = 'rgba(255,255,255,0.45)';
+            ctx.shadowBlur = 3;
+            ctx.shadowOffsetX = 0;
+            ctx.shadowOffsetY = 0;
             ctx.drawImage(img, -this.size / 2, -this.size / 2, this.size, this.size);
+            ctx.shadowColor = 'transparent';
+            ctx.shadowBlur = 0;
         }
         ctx.restore();
     }
@@ -258,7 +266,11 @@ class SlicePiece {
         ctx.rotate(-sliceAngleRel);
 
         ctx.imageSmoothingEnabled = false;
+        ctx.shadowColor = 'rgba(255,255,255,0.45)';
+        ctx.shadowBlur = 3;
         ctx.drawImage(img, -this.size / 2, -this.size / 2, this.size, this.size);
+        ctx.shadowColor = 'transparent';
+        ctx.shadowBlur = 0;
 
         ctx.restore();
         ctx.globalAlpha = 1.0;

@@ -1,6 +1,6 @@
 :root {
-    /* NES Super Mario Sky Blue */
-    --bg-color: #5c94fc;
+    /* Deep NES-dusk blue (darkened from #5c94fc for text/face contrast) */
+    --bg-color: #26418f;
     --text-color: #ffffff;
     --accent-color: #f1c40f;
     /* Gold coin color for text */
