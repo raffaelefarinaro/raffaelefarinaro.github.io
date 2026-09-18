@@ -266,6 +266,7 @@ class SlicePiece {
 }
 
 function init() {
+    document.body.classList.add('playing'); // hide system cursor while playing
     resize();
     createGrid();
     updateButtonPositions();
@@ -336,6 +337,10 @@ function checkCollisions() {
 }
 
 function drawCursor() {
+    // Only the custom red dot/trail is shown while the game is active; once
+    // unlocked we restore the system cursor and stop drawing it.
+    if (isUnlocked) return;
+
     // Draw Trail
     for (let i = 0; i < cursorTrail.length; i++) {
         const point = cursorTrail[i];
@@ -508,6 +513,7 @@ function handleInput(e, isClick) {
 function checkWinCondition() {
     if (heads.length === 0) {
         isUnlocked = true;
+        document.body.classList.remove('playing'); // show system cursor again
         ui.style.display = 'none'; // Hide the bottom UI text
         // Show the banner
         const banner = document.getElementById('win-banner');

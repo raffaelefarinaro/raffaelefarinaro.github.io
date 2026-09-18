@@ -106,6 +106,16 @@ html {
     pointer-events: none;
 }
 
+/* While the game is active, hide the system cursor over the hero and the UI
+   banner so only the custom red dot/laser pointer is visible. The projects
+   section keeps its normal cursor. Removed on win/nuke unlock. */
+body.playing #pixel-site,
+body.playing #pixel-site *,
+body.playing #ui,
+body.playing #ui * {
+    cursor: none !important;
+}
+
 /* Locked state for buttons covered by faces */
 .pixel-btn.is-locked {
     background-color: #7f8c8d;

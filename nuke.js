@@ -172,18 +172,17 @@
         runMushroomAnimation(popFaces, done);
     }
 
-    // Nuke finishing: unlock the game WITHOUT the prize banner and WITHOUT hiding
-    // the #ui banner. The banner keeps its instructions; the counter shows a nuke
-    // note. Proper play keeps the MISSION ACCOMPLISHED banner exclusively.
+    // Nuke finishing: unlock the game, restore the system cursor, and hide the
+    // #ui banner entirely (tap/slice instructions + NUKE button are done).
+    // Proper play still keeps the MISSION ACCOMPLISHED banner exclusively.
     function finishNuke() {
         try {
             isUnlocked = true;
+            document.body.classList.remove('playing');
             const ui = document.getElementById('ui');
-            if (ui) {
-                ui.style.display = '';           // undo any hide
-                const watch = ui.querySelector('.ui-watch');
-                if (watch) watch.textContent = 'RADIATION CLEARED.';
-            }
+            if (ui) ui.style.display = 'none';
+            const hint = document.querySelector('.game-hint');
+            if (hint) hint.style.display = 'none';
             const canvas = document.getElementById('game-canvas');
             if (canvas) canvas.style.cursor = 'auto';
             document.querySelectorAll('.pixel-btn').forEach(b => b.classList.remove('is-locked'));
@@ -192,13 +191,13 @@
 
     function sweepNuke(done) {
         // Fallback path: the game's own checkWinCondition will try to show the
-        // prize banner and hide the UI; suppress both afterwards.
+        // prize banner and hide the UI; suppress the banner, keep UI hidden.
         const suppressBanner = () => {
             try {
                 const banner = document.getElementById('win-banner');
                 if (banner) banner.classList.add('hidden');
                 const ui = document.getElementById('ui');
-                if (ui) ui.style.display = '';
+                if (ui) ui.style.display = 'none';
                 finishNuke();
             } catch (e) {}
         };
