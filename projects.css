@@ -20,6 +20,7 @@ html {
 /* Prevent accidental text selection while slicing faces */
 #pixel-site,
 #projects,
+#work,
 #ui,
 #win-banner {
     -webkit-user-select: none;
@@ -75,6 +76,12 @@ html {
     color: var(--text-color);
     transition: transform 0.1s, box-shadow 0.1s, background 0.1s;
     pointer-events: auto;
+    min-width: 0;
+}
+
+.project-info {
+    min-width: 0;
+    overflow-wrap: anywhere;
 }
 
 .project-card:hover {
@@ -126,6 +133,77 @@ html {
     opacity: 0.85;
     max-width: 640px;
     margin: 0 auto;
+}
+
+/* Work section — non-clickable cards with external links inside */
+.section-intro {
+    font-size: 10px;
+    line-height: 1.9;
+    opacity: 0.9;
+    max-width: 640px;
+    margin: -12px auto 28px;
+}
+
+.work-tag {
+    display: inline-block;
+    font-size: 8px;
+    color: var(--accent-color);
+    letter-spacing: 1px;
+    margin-bottom: 10px;
+    opacity: 0.9;
+}
+
+.work-card {
+    cursor: default;
+}
+
+/* Work section is a deliberate 2-up, not auto-fit: two entries, balanced width */
+.work-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    max-width: 780px;
+    margin: 0 auto;
+}
+
+@media (max-width: 640px) {
+    .work-grid {
+        grid-template-columns: minmax(0, 1fr);
+        max-width: 420px;
+    }
+}
+
+.work-card:hover {
+    transform: none;
+    box-shadow: 6px 6px 0px #000;
+    background: var(--card-bg);
+}
+
+.work-links {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+}
+
+.work-links a {
+    font-size: 9px;
+    color: #fff;
+    text-decoration: none;
+    background: rgba(0, 0, 0, 0.45);
+    border: 2px solid #fff;
+    box-shadow: 2px 2px 0px #000;
+    padding: 6px 9px;
+    /* set explicitly so the section's black text-shadow is not inherited into
+       the hover state, where the text turns dark on a gold background */
+    text-shadow: 2px 2px 0px #000;
+    transition: transform 0.1s, background 0.1s, color 0.1s;
+}
+
+.work-links a:hover {
+    transform: translate(2px, 2px);
+    box-shadow: 0 0 0 #000;
+    background: var(--accent-color);
+    color: #111;
+    /* dark text on gold: drop the black shadow so the label stays legible */
+    text-shadow: none;
 }
 
 .game-hint {

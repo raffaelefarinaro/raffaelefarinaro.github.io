@@ -15,6 +15,14 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
+    const workBtn = document.getElementById('work-btn');
+    if (workBtn) {
+        workBtn.addEventListener('click', (e) => {
+            e.preventDefault();
+            document.getElementById('work').scrollIntoView({ behavior: 'smooth' });
+        });
+    }
+
     // Keep the game grid within the hero viewport only.
     const canvas = document.getElementById('game-canvas');
     if (canvas) {

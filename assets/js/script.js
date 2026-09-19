@@ -35,6 +35,40 @@ headImage.src = 'assets/face.png';
 const scaredImage = new Image();
 scaredImage.src = 'assets/face_scared.png';
 
+// --- SPRITES ---
+// Drawing the 1024px source with a canvas shadow per head each frame is slow in
+// Chrome (shadowBlur is a CPU-rasterized blur). Instead we bake the light rim
+// into one small offscreen canvas per face, then blit it with no shadow.
+const SPRITE_SCALE = 2; // 96px head for the 48px slot, keeps edges crisp on HiDPI
+const SPRITE_PAD = 8;   // room for the baked rim so it is not clipped at the edges
+let headSprite = null;
+let scaredSprite = null;
+
+function makeSprite(img) {
+    const size = HEAD_SIZE * SPRITE_SCALE;
+    const full = size + SPRITE_PAD * 2;
+    const c = document.createElement('canvas');
+    c.width = full;
+    c.height = full;
+    c.drawSize = size;
+    c.pad = SPRITE_PAD;
+    const x = c.getContext('2d');
+    x.imageSmoothingEnabled = false;
+    x.shadowColor = 'rgba(255,255,255,0.45)';
+    x.shadowBlur = 3 * SPRITE_SCALE;
+    x.shadowOffsetX = 0;
+    x.shadowOffsetY = 0;
+    x.drawImage(img, SPRITE_PAD, SPRITE_PAD, size, size);
+    return c;
+}
+
+function buildSprites() {
+    if (headImage.complete && headImage.naturalWidth) headSprite = makeSprite(headImage);
+    if (scaredImage.complete && scaredImage.naturalWidth) scaredSprite = makeSprite(scaredImage);
+}
+headImage.addEventListener('load', buildSprites);
+scaredImage.addEventListener('load', buildSprites);
+
 // --- BUTTON TRACKING ---
 let buttons = [];
 
@@ -125,16 +159,17 @@ class Head {
         ctx.rotate(angle);
 
         const img = (scareTimer > 0) ? scaredImage : headImage;
+        const sprite = (scareTimer > 0) ? scaredSprite : headSprite;
         if (img.complete) {
-            // Soft dark outline + faint light rim so the faces read against the
-            // darker background without losing the pixel look.
-            ctx.shadowColor = 'rgba(255,255,255,0.45)';
-            ctx.shadowBlur = 3;
-            ctx.shadowOffsetX = 0;
-            ctx.shadowOffsetY = 0;
-            ctx.drawImage(img, -this.size / 2, -this.size / 2, this.size, this.size);
-            ctx.shadowColor = 'transparent';
-            ctx.shadowBlur = 0;
+            // Pre-baked rim sprite: no per-frame shadow blur (much faster in Chrome).
+            ctx.imageSmoothingEnabled = false;
+            if (sprite) {
+                const pad = sprite.pad / SPRITE_SCALE;
+                const draw = this.size + pad * 2;
+                ctx.drawImage(sprite, -this.size / 2 - pad, -this.size / 2 - pad, draw, draw);
+            } else {
+                ctx.drawImage(img, -this.size / 2, -this.size / 2, this.size, this.size);
+            }
         }
         ctx.restore();
     }
@@ -266,11 +301,14 @@ class SlicePiece {
         ctx.rotate(-sliceAngleRel);
 
         ctx.imageSmoothingEnabled = false;
-        ctx.shadowColor = 'rgba(255,255,255,0.45)';
-        ctx.shadowBlur = 3;
-        ctx.drawImage(img, -this.size / 2, -this.size / 2, this.size, this.size);
-        ctx.shadowColor = 'transparent';
-        ctx.shadowBlur = 0;
+        const sprite = (scareTimer > 0) ? scaredSprite : headSprite;
+        if (sprite) {
+            const pad = sprite.pad / SPRITE_SCALE;
+            const draw = this.size + pad * 2;
+            ctx.drawImage(sprite, -this.size / 2 - pad, -this.size / 2 - pad, draw, draw);
+        } else {
+            ctx.drawImage(img, -this.size / 2, -this.size / 2, this.size, this.size);
+        }
 
         ctx.restore();
         ctx.globalAlpha = 1.0;

@@ -182,7 +182,7 @@
             const ui = document.getElementById('ui');
             if (ui) ui.style.display = 'none';
             const hint = document.querySelector('.game-hint');
-            if (hint) hint.style.display = 'none';
+            if (hint) hint.style.visibility = 'hidden';
             const canvas = document.getElementById('game-canvas');
             if (canvas) canvas.style.cursor = 'auto';
             document.querySelectorAll('.pixel-btn').forEach(b => b.classList.remove('is-locked'));
