@@ -59,8 +59,17 @@ html {
 
 .project-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    grid-template-columns: repeat(2, minmax(0, 1fr));
     gap: 20px;
+    max-width: 780px;
+    margin: 0 auto;
+}
+
+@media (max-width: 640px) {
+    .project-grid {
+        grid-template-columns: minmax(0, 1fr);
+        max-width: 420px;
+    }
 }
 
 .project-card {
@@ -155,20 +164,6 @@ html {
 
 .work-card {
     cursor: default;
-}
-
-/* Work section is a deliberate 2-up, not auto-fit: two entries, balanced width */
-.work-grid {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-    max-width: 780px;
-    margin: 0 auto;
-}
-
-@media (max-width: 640px) {
-    .work-grid {
-        grid-template-columns: minmax(0, 1fr);
-        max-width: 420px;
-    }
 }
 
 .work-card:hover {
