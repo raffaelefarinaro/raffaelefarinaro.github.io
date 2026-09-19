@@ -73,8 +73,11 @@ scaredImage.addEventListener('load', buildSprites);
 let buttons = [];
 
 function updateButtonPositions() {
-    // Cache button bounding boxes to avoid layout thrashing
-    const btns = document.querySelectorAll('.pixel-btn');
+    // Cache button bounding boxes to avoid layout thrashing.
+    // Only the hero's own buttons are part of the game's block/lock logic;
+    // buttons further down the page (e.g. the WORK section's links) must stay
+    // clickable, so they are deliberately excluded.
+    const btns = document.querySelectorAll('#pixel-site .pixel-btn');
     buttons = Array.from(btns).map(btn => ({
         element: btn,
         rect: btn.getBoundingClientRect()
