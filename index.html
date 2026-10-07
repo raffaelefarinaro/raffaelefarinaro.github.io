@@ -8,35 +8,38 @@
 	<meta name="description" content="Senior PM in computer vision and GenAI. I build the AI-native products I manage: agent skills, agentic pipelines, and the AI operating layer I run my own work on.">
 	<link rel="icon" href="assets/face_scared.png" type="image/png">
 	<link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
-	<link rel="stylesheet" href="assets/css/style.css?v=4">
-	<link rel="stylesheet" href="projects.css?v=11">
+	<link rel="stylesheet" href="assets/css/style.css?v=6">
+	<link rel="stylesheet" href="projects.css?v=12">
 </head>
 
 <body>
 
-	<div id="pixel-site">
+	<main>
+	<header id="pixel-site">
+		<div class="hero-content">
 		<h1>RAFFAELE FARINARO</h1>
 		<p>SENIOR PRODUCT MANAGER | APPLIED AI | CREATOR<br>Turning ideas into pixels.</p>
 
-		<div class="link-container">
+		<nav class="link-container" aria-label="Main navigation">
 			<a href="#projects" class="pixel-btn" id="projects-btn">PROJECTS</a>
 			<a href="#work" class="pixel-btn" id="work-btn">WORK</a>
-			<a href="https://www.linkedin.com/in/raffaele-farinaro/" target="_blank" class="pixel-btn">LINKEDIN</a>
-			<a href="assets/resume.pdf" target="_blank" class="pixel-btn">CV</a>
 			<a href="mailto:raffaelefarinaro@gmail.com" class="pixel-btn">CONTACT</a>
-			<a href="https://github.com/raffaelefarinaro" target="_blank" rel="noopener" class="pixel-btn">GITHUB</a>
-		</div>
+			<a href="https://www.linkedin.com/in/raffaele-farinaro/" target="_blank" rel="noopener" class="pixel-btn secondary-btn">LINKEDIN</a>
+			<a href="assets/resume.pdf" target="_blank" rel="noopener" class="pixel-btn secondary-btn">CV</a>
+			<a href="https://github.com/raffaelefarinaro" target="_blank" rel="noopener" class="pixel-btn secondary-btn">GITHUB</a>
+		</nav>
 
 		<div class="game-hint">PSST... THE FACES ARE SLICEABLE</div>
-	</div>
+		</div>
+	</header>
 
-	<div id="projects" class="projects-section hidden">
+	<section id="projects" class="projects-section">
 		<h2>PROJECTS</h2>
 
 		<div class="project-grid">
 
 			<a class="project-card" href="https://www.raffaelefarinaro.com/ciaobot/" target="_blank" rel="noopener">
-				<img src="assets/ciaobot.png" alt="Ciaobot" class="project-icon">
+				<img src="assets/ciaobot.png" alt="Ciaobot" class="project-icon" width="64" height="64" loading="lazy">
 				<div class="project-info">
 					<h3>CIAOBOT</h3>
 					<p>Your second brain and personal assistant, built on the agent CLIs you already use (Claude Code, opencode, Codex). One local interface for chats, projects, files, schedules and memory &mdash; all plain Markdown you own.</p>
@@ -44,8 +47,8 @@
 				</div>
 			</a>
 
-			<a class="project-card" href="https://upwordo.com" target="_blank">
-				<img src="assets/upwordo.png" alt="Upwordo" class="project-icon">
+			<a class="project-card" href="https://upwordo.com" target="_blank" rel="noopener">
+				<img src="assets/upwordo.png" alt="Upwordo" class="project-icon" width="64" height="64" loading="lazy">
 				<div class="project-info">
 					<h3>UPWORDO</h3>
 					<p>Learn German through micro-stories at A1&ndash;B2. One story, five ways, until you can retell it: spaced repetition, AI writing coach and grammar guides, with a top-10 German learning podcast.</p>
@@ -53,8 +56,8 @@
 				</div>
 			</a>
 
-			<a class="project-card" href="https://squadrasmart.weirdfisheslab.cloud" target="_blank">
-				<img src="assets/squadrasmart.png" alt="SquadraSmart" class="project-icon">
+			<a class="project-card" href="https://squadrasmart.weirdfisheslab.cloud" target="_blank" rel="noopener">
+				<img src="assets/squadrasmart.png" alt="SquadraSmart" class="project-icon" width="64" height="64" loading="lazy">
 				<div class="project-info">
 					<h3>SQUADRASMART</h3>
 					<p>Shift-scheduling for Italian emergency-response teams. Rule-driven planner, coverage alerts, recuperi and service presets, requests with approvals, roles for editor/utente/spettatore.</p>
@@ -62,8 +65,8 @@
 				</div>
 			</a>
 
-			<a class="project-card" href="https://fisicisenzapalestra.com" target="_blank">
-				<img src="assets/fisici.png" alt="Fisici Senza Palestra" class="project-icon">
+			<a class="project-card" href="https://fisicisenzapalestra.com" target="_blank" rel="noopener">
+				<img src="assets/fisici.png" alt="Fisici Senza Palestra" class="project-icon" width="64" height="64" loading="lazy">
 				<div class="project-info">
 					<h3>FISICI SENZA PALESTRA</h3>
 					<p>Scientific outreach community and blog making complex science accessible. Managed a team of authors at university.</p>
@@ -72,9 +75,9 @@
 			</a>
 
 		</div>
-	</div>
+	</section>
 
-	<div id="work" class="projects-section">
+	<section id="work" class="projects-section">
 		<h2>WORK</h2>
 		<p class="section-intro">Shipping AI-powered data capture at Scandit as Senior Product Manager.</p>
 
@@ -111,30 +114,25 @@
 		<div class="work-more">
 			<a href="https://www.scandit.com/authors/raffaele-farinaro/" target="_blank" rel="noopener" class="pixel-btn">ALL WRITING &rarr;</a>
 		</div>
-	</div>
+	</section>
+	</main>
 
 	<div id="win-banner" class="hidden">
-		<div class="banner-content">
-			<h2>MISSION ACCOMPLISHED!</h2>
+		<div class="banner-content" role="dialog" aria-modal="true" aria-labelledby="win-title">
+			<h2 id="win-title">MISSION ACCOMPLISHED!</h2>
 			<p>You have eliminated all targets.</p>
-			<a href="https://www.youtube.com/watch?v=dQw4w9WgXcQ" target="_blank" class="pixel-btn prize-btn">CLAIM PRIZE</a>
+			<a href="https://www.youtube.com/watch?v=dQw4w9WgXcQ" target="_blank" rel="noopener" class="pixel-btn prize-btn">CLAIM PRIZE</a>
+			<button type="button" id="continue-btn" class="pixel-btn">BACK TO SITE</button>
 		</div>
 	</div>
 
-	<canvas id="game-canvas"></canvas>
+	<canvas id="game-canvas" aria-hidden="true"></canvas>
 
 	<div id="ui">THEY ARE WATCHING...<br>TAP TO ELIMINATE</div>
 
-	<script>
-		// Show projects section on load (preview mode). On the real page this can be
-		// revealed after the game is cleared, or always visible below the fold.
-		window.addEventListener('DOMContentLoaded', () => {
-			document.getElementById('projects').classList.remove('hidden');
-		});
-	</script>
-	<script src="assets/js/script.js?v=9"></script>
-	<script src="projects.js?v=3"></script>
-	<script src="nuke.js?v=8"></script>
+	<script src="assets/js/script.js?v=11"></script>
+	<script src="projects.js?v=4"></script>
+	<script src="nuke.js?v=9"></script>
 
 </body>
 

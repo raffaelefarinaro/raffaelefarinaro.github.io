@@ -14,6 +14,7 @@ let slices = [];
 let cursorTrail = []; // Stores {x, y, life}
 let mouse = { x: window.innerWidth / 2, y: window.innerHeight / 2 };
 let prevMouse = { x: window.innerWidth / 2, y: window.innerHeight / 2 };
+const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 let audioCtx = null;
 let isUnlocked = false;
 
@@ -77,10 +78,15 @@ function updateButtonPositions() {
     // Only the hero's own buttons are part of the game's block/lock logic;
     // buttons further down the page (e.g. the WORK section's links) must stay
     // clickable, so they are deliberately excluded.
+    const bounds = canvas.getBoundingClientRect();
     const btns = document.querySelectorAll('#pixel-site .pixel-btn');
     buttons = Array.from(btns).map(btn => ({
         element: btn,
-        rect: btn.getBoundingClientRect()
+        rect: (() => {
+            const rect = btn.getBoundingClientRect();
+            return { left: rect.left - bounds.left, right: rect.right - bounds.left,
+                top: rect.top - bounds.top, bottom: rect.bottom - bounds.top };
+        })()
     }));
 }
 
@@ -141,7 +147,7 @@ class Head {
     }
 
     update() {
-        if (scareTimer > 0) {
+        if (scareTimer > 0 && !reducedMotion) {
             this.x = this.baseX + (Math.random() * 6 - 3);
             this.y = this.baseY + (Math.random() * 6 - 3);
         } else {
@@ -324,12 +330,24 @@ function init() {
     createGrid();
     updateButtonPositions();
     animate();
+    document.fonts.ready.then(() => {
+        updateButtonPositions();
+        if (!isUnlocked) createGrid();
+    });
 }
 
 function createGrid() {
     if (isUnlocked) return;
 
     heads = [];
+    const heroRect = document.querySelector('.hero-content').getBoundingClientRect();
+    const canvasRect = canvas.getBoundingClientRect();
+    const protectedRects = [heroRect, ui.getBoundingClientRect()].map(rect => ({
+        left: rect.left - canvasRect.left - 32,
+        right: rect.right - canvasRect.left + 32,
+        top: rect.top - canvasRect.top - 32,
+        bottom: rect.bottom - canvasRect.top + 32
+    }));
     const area = canvas.width * canvas.height;
     const densityBoost = Math.sqrt(area / (TARGET_TAPS * 1.4));
     const spacing = Math.min(GRID_SPACING, densityBoost);
@@ -345,7 +363,10 @@ function createGrid() {
             const y = offsetY + r * spacing;
 
             if (x > -spacing && x < canvas.width && y > -spacing && y < canvas.height) {
-                heads.push(new Head(x, y));
+                const overlapsContent = protectedRects.some(rect =>
+                    x < rect.right && x + HEAD_SIZE > rect.left &&
+                    y < rect.bottom && y + HEAD_SIZE > rect.top);
+                if (!overlapsContent) heads.push(new Head(x, y));
             }
         }
     }
@@ -355,8 +376,9 @@ function createGrid() {
 }
 
 function resize() {
-    canvas.width = window.innerWidth;
-    canvas.height = window.innerHeight;
+    // Match the page's content width, excluding the vertical scrollbar.
+    canvas.width = document.getElementById('pixel-site').clientWidth;
+    canvas.height = document.getElementById('pixel-site').offsetHeight;
     updateButtonPositions();
     if (!isUnlocked) createGrid();
 }
@@ -458,12 +480,13 @@ function animate() {
         }
     }
 
-    drawCursor();
+    if (!reducedMotion) drawCursor();
 
     requestAnimationFrame(animate);
 }
 
 function handleInput(e, isClick) {
+    if (e.target.closest && e.target.closest('a, button')) return;
     const now = performance.now();
     let cx, cy;
 
@@ -480,6 +503,11 @@ function handleInput(e, isClick) {
         cy = e.clientY;
     }
 
+    const bounds = canvas.getBoundingClientRect();
+    if (cx < bounds.left || cx > bounds.right || cy < bounds.top || cy > bounds.bottom) return;
+    cx -= bounds.left;
+    cy -= bounds.top;
+
     prevMouse.x = mouse.x;
     prevMouse.y = mouse.y;
     mouse.x = cx;
@@ -495,35 +523,16 @@ function handleInput(e, isClick) {
             e.preventDefault();
         }
 
-        let hit = false;
         // Priority 1: Click on a Face
         for (let i = heads.length - 1; i >= 0; i--) {
             if (heads[i].isHit(cx, cy)) {
                 triggerExplosion(heads[i]);
                 playExplosionSound();
                 scareTimer = SCARE_DURATION;
-                hit = true;
                 break;
             }
         }
 
-        if (hit) {
-            // Face exploded. Done.
-        } else {
-            // Priority 2: Check buttons below
-            // But ONLY if the button is NOT locked
-            canvas.style.visibility = 'hidden';
-            const elementBelow = document.elementFromPoint(cx, cy);
-            canvas.style.visibility = 'visible';
-
-            if (elementBelow && (elementBelow.closest('a') || elementBelow.closest('button'))) {
-                const target = elementBelow.closest('a') || elementBelow.closest('button');
-                // Check if this specific target is locked
-                if (!target.classList.contains('is-locked')) {
-                    target.click();
-                }
-            }
-        }
 
         checkWinCondition();
     }
@@ -571,6 +580,7 @@ function checkWinCondition() {
         // Show the banner
         const banner = document.getElementById('win-banner');
         banner.classList.remove('hidden');
+        document.getElementById('continue-btn').focus();
 
         // Let user use system cursor now
         canvas.style.cursor = 'auto';
@@ -657,8 +667,7 @@ window.addEventListener('touchstart', e => {
     handleInput(e, false);
 }, { passive: false });
 window.addEventListener('touchmove', e => {
-    // Prevent scrolling or zooming while playing
-    if (!isUnlocked) e.preventDefault();
+    // Keep native page scrolling available while the optional game is active.
     handleInput(e, false);
 }, { passive: false });
 // Switch to touchend for clicking

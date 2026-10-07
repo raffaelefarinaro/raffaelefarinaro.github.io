@@ -1,220 +1,193 @@
 :root {
-    /* Deep NES-dusk blue (darkened from #5c94fc for text/face contrast) */
     --bg-color: #26418f;
-    --text-color: #ffffff;
+    --surface-color: #1b3273;
+    --text-color: #fff;
+    --muted-color: #d1ddff;
     --accent-color: #f1c40f;
-    /* Gold coin color for text */
-    --btn-bg: #e74c3c;
+    --button-color: #b44813;
+    --space-sm: 12px;
+    --space-md: 24px;
+    --space-lg: 48px;
+    --space-xl: 80px;
 }
-
-body,
+* { box-sizing: border-box; }
 html {
+    scroll-behavior: smooth;
+    scrollbar-color: var(--accent-color) var(--surface-color);
+}
+html, body {
     margin: 0;
     padding: 0;
-    width: 100%;
-    height: 100%;
-    overflow: hidden;
-    background-color: var(--bg-color);
+    min-height: 100%;
+    background: var(--bg-color);
     font-family: 'Press Start 2P', cursive;
+    color: var(--text-color);
 }
-
+::selection { background: var(--accent-color); color: #142452; text-shadow: none; }
+a:focus-visible, button:focus-visible {
+    outline: 3px solid var(--accent-color);
+    outline-offset: 7px;
+}
 #pixel-site {
-    position: absolute;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
+    position: relative;
     z-index: 1;
-    /* Keeping it below the game canvas */
+    min-height: 700px;
+    height: 100svh;
+    padding: 100px var(--space-md) 160px;
     display: flex;
-    flex-direction: column;
     align-items: center;
     justify-content: center;
-    color: var(--text-color);
     text-align: center;
-    overflow-y: auto;
-    padding: 20px;
-    box-sizing: border-box;
-    /* Subtle text shadow for readability on blue */
-    text-shadow: 2px 2px 0px #000;
+    text-shadow: 2px 2px 0 #000;
     pointer-events: none;
-    /* Let clicks pass through generally */
+    user-select: none;
 }
-
+.hero-content { width: min(100%, 800px); }
 #pixel-site h1 {
-    font-size: 24px;
-    line-height: 1.5;
-    margin-bottom: 10px;
+    font-size: clamp(22px, 3.1vw, 40px);
+    line-height: 1.65;
+    margin: 0 0 var(--space-md);
     color: var(--accent-color);
-    text-shadow: 4px 4px 0px #000;
+    text-shadow: 4px 4px 0 #000;
+    text-wrap: balance;
 }
-
 #pixel-site p {
     font-size: 12px;
-    line-height: 1.8;
-    margin-bottom: 40px;
+    line-height: 2.2;
     max-width: 600px;
+    margin: 0 auto 36px;
+    text-wrap: balance;
 }
-
 .link-container {
     display: grid;
     grid-template-columns: repeat(3, minmax(0, 1fr));
-    gap: 20px;
-    width: 100%;
-    max-width: 560px;
-    box-sizing: border-box;
-    pointer-events: none;
-    /* Container doesn't block, children do via JS if needed or z-index trickery */
+    gap: 16px;
+    max-width: 600px;
+    margin: 0 auto;
 }
-
-@media (max-width: 480px) {
-    .link-container {
-        grid-template-columns: minmax(0, 1fr);
-        max-width: 260px;
-    }
-}
-
 .pixel-btn {
-    display: inline-block;
-    background-color: #e67e22;
-    /* Brick color */
-    color: #fff;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 48px;
+    border: 0;
+    background: var(--button-color);
+    color: var(--text-color);
+    font-family: inherit;
+    font-size: 12px;
     text-decoration: none;
     padding: 15px 20px;
-    font-size: 12px;
     text-align: center;
-    position: relative;
-    transition: transform 0.1s;
     text-shadow: 2px 2px 0 #000;
-    box-shadow:
-        inset 2px 2px 0px 0px #f39c12,
-        inset -2px -2px 0px 0px #d35400,
-        4px 4px 0px 0px #000;
+    box-shadow: inset 2px 2px 0 #f39c12, inset -2px -2px 0 #7f310d, 4px 4px 0 #000;
+    cursor: pointer;
     pointer-events: auto;
-    /* Buttons catch clicks - but canvas is on top! */
-    /* We rely on the canvas click handler to delegate clicks to these if missed */
+    transition: transform 120ms ease-out, background 120ms ease-out;
 }
-
+.secondary-btn {
+    background: var(--surface-color);
+    box-shadow: inset 0 0 0 2px var(--muted-color), 4px 4px 0 #000;
+    font-size: 11px;
+}
 .pixel-btn:not(.is-locked):hover {
     transform: translate(2px, 2px);
-    background-color: #f39c12;
-    /* gold background: darken the label and drop the black shadow for legibility */
+    background: var(--accent-color);
     color: #111;
     text-shadow: none;
-    box-shadow:
-        inset 2px 2px 0px 0px #f1c40f,
-        inset -2px -2px 0px 0px #e67e22,
-        2px 2px 0px 0px #000;
+    box-shadow: inset 2px 2px 0 #ffe475, inset -2px -2px 0 #c59d08, 2px 2px 0 #000;
 }
-
+.pixel-btn.is-locked {
+    background: #34495e;
+    color: #d1ddff;
+    pointer-events: none;
+}
+.game-hint {
+    margin-top: 28px;
+    font: 11px/1.8 system-ui, sans-serif;
+    letter-spacing: 1px;
+    color: var(--muted-color);
+}
 #game-canvas {
     position: absolute;
     top: 0;
     left: 0;
+    width: 100%;
     z-index: 2;
-    /* ABOVE the site content */
-    touch-action: none;
-    cursor: none;
-    /* Hide default cursor for custom one */
     pointer-events: none;
+    touch-action: pan-y;
 }
-
-/* While the game is active, hide the system cursor over the hero and the UI
-   banner so only the custom red dot/laser pointer is visible. The projects
-   section keeps its normal cursor. Removed on win/nuke unlock. */
-body.playing #pixel-site,
-body.playing #pixel-site *,
-body.playing #ui,
-body.playing #ui * {
-    cursor: none !important;
-}
-
-/* Locked state for buttons covered by faces */
-.pixel-btn.is-locked {
-    background-color: #7f8c8d;
-    /* Gray */
-    box-shadow:
-        inset 2px 2px 0px 0px #95a5a6,
-        inset -2px -2px 0px 0px #34495e,
-        4px 4px 0px 0px #000;
-    transform: translate(2px, 2px);
-    /* Look pressed/inactive */
-    color: #bdc3c7;
-    pointer-events: none;
-    /* Double ensure no interaction */
-}
-
 #ui {
     position: absolute;
-    bottom: 20px;
+    top: calc(max(100svh, 700px) - 128px);
     left: 50%;
     transform: translateX(-50%);
     z-index: 3;
-    font-family: 'Press Start 2P', cursive;
-    color: #fff;
-    text-shadow: 2px 2px 0 #000;
-    background: rgba(0, 0, 0, 0.78);
+    width: min(90%, 600px);
+    min-height: 88px;
     padding: 15px 20px;
     border: 2px solid #fff;
-    pointer-events: none;
+    background: #0c1534;
     text-align: center;
-    font-size: 10px;
-    width: 90%;
-    max-width: 500px;
+    font-size: 11px;
     line-height: 1.5;
+    text-shadow: 2px 2px 0 #000;
+    pointer-events: none;
+    user-select: none;
 }
-
+#ui.with-nuke { display: flex; align-items: center; justify-content: center; flex-wrap: wrap; gap: 12px; }
+.ui-watch { width: 100%; }
+#ui .ui-text { font: 11px/1.5 system-ui, sans-serif; }
+.ui-or { color: var(--accent-color); }
+#nuke-btn {
+    border: 0;
+    min-height: 44px;
+    padding: 10px 16px;
+    background: #c0392b;
+    color: #fff;
+    font: 11px 'Press Start 2P', cursive;
+    box-shadow: inset 2px 2px 0 #e74c3c, inset -2px -2px 0 #922b21, 3px 3px 0 #000;
+    cursor: pointer;
+    pointer-events: auto;
+}
+#nuke-btn:hover { background: #922b21; }
+#nuke-btn:active { transform: translate(2px, 2px); }
 #win-banner {
     position: fixed;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
+    inset: 0;
     z-index: 10;
     display: flex;
     justify-content: center;
     align-items: center;
-    background: rgba(0, 0, 0, 0.8);
-    backdrop-filter: blur(2px);
+    background: rgb(0 0 0 / 80%);
 }
-
-#win-banner.hidden {
-    display: none;
-}
-
+#win-banner.hidden { display: none; }
 .banner-content {
+    width: min(90%, 640px);
+    padding: 40px 24px;
+    border: 4px solid #000;
     background: #fff;
     color: #000;
-    padding: 30px;
+    box-shadow: 10px 10px 0 #000;
     text-align: center;
-    border: 4px solid #000;
-    box-shadow: 10px 10px 0px #000;
     display: flex;
     flex-direction: column;
-    gap: 20px;
     align-items: center;
+    gap: 20px;
 }
-
-.banner-content h2 {
-    color: #2ecc71;
-    font-size: 20px;
-    margin: 0;
-    text-shadow: 2px 2px 0 #000;
-    -webkit-text-stroke: 1px black;
+.banner-content h2 { margin: 0; color: #126d36; font-size: 20px; line-height: 1.8; }
+.banner-content p { font: 16px/1.6 system-ui, sans-serif; }
+.prize-btn { background: var(--accent-color); color: #111; text-shadow: none; }
+#continue-btn { background: var(--surface-color); }
+@media (max-width: 600px) {
+    #pixel-site { padding: 64px 24px 164px; min-height: 720px; }
+    #pixel-site p { line-height: 2; max-width: 340px; }
+    .link-container { grid-template-columns: repeat(2, minmax(0, 1fr)); max-width: 360px; gap: 12px; }
+    .pixel-btn { font-size: 11px; padding: 14px 10px; }
+    #ui { top: calc(max(100svh, 720px) - 132px); padding: 12px; }
+    .banner-content h2 { font-size: 15px; }
 }
-
-.prize-btn {
-    background-color: #f1c40f !important;
-    color: #000 !important;
-    animation: pulse 1s infinite alternate;
-}
-
-@keyframes pulse {
-    from {
-        transform: scale(1);
-    }
-
-    to {
-        transform: scale(1.05);
-    }
+@media (prefers-reduced-motion: reduce) {
+    html { scroll-behavior: auto; }
+    *, *::before, *::after { animation: none !important; transition: none !important; }
+    #game-canvas { visibility: hidden; }
 }

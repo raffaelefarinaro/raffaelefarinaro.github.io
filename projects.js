@@ -1,46 +1,24 @@
-// Projects section enhancements for the redesign preview.
-// On the real page, the "PROJECTS" button scrolls smoothly; the canvas game
-// stays confined to the hero viewport.
-
+// Portfolio navigation keeps native anchor behavior, including URL hashes.
 document.addEventListener('DOMContentLoaded', () => {
-    // Prevent text selection while dragging/slicing faces (CSS user-select:none
-    // does the heavy lifting; this blocks programmatic/double-click selection too)
-    document.addEventListener('selectstart', (e) => e.preventDefault());
-
-    const btn = document.getElementById('projects-btn');
-    if (btn) {
-        btn.addEventListener('click', (e) => {
-            e.preventDefault();
-            document.getElementById('projects').scrollIntoView({ behavior: 'smooth' });
-        });
+    const banner = document.getElementById('win-banner');
+    const continueButton = document.getElementById('continue-btn');
+    function closeBanner() {
+        banner.classList.add('hidden');
+        document.getElementById('projects-btn').focus({ preventScroll: true });
     }
-
-    const workBtn = document.getElementById('work-btn');
-    if (workBtn) {
-        workBtn.addEventListener('click', (e) => {
-            e.preventDefault();
-            document.getElementById('work').scrollIntoView({ behavior: 'smooth' });
-        });
-    }
-
-    // Keep the game grid within the hero viewport only.
-    const canvas = document.getElementById('game-canvas');
-    if (canvas) {
-        const resizeToHero = () => {
-            canvas.height = window.innerHeight;
-            canvas.width = window.innerWidth;
-            window.dispatchEvent(new Event('resize'));
-        };
-        resizeToHero();
-    }
-
-    // Once the game is cleared, auto-scroll back up so the win banner is visible.
-    const observer = new MutationObserver(() => {
-        const banner = document.getElementById('win-banner');
-        if (banner && !banner.classList.contains('hidden')) {
-            window.scrollTo({ top: 0, behavior: 'smooth' });
+    continueButton.addEventListener('click', closeBanner);
+    document.addEventListener('keydown', event => {
+        if (banner.classList.contains('hidden')) return;
+        if (event.key === 'Escape') closeBanner();
+        if (event.key === 'Tab') {
+            const prize = banner.querySelector('a');
+            if (event.shiftKey && document.activeElement === prize) {
+                event.preventDefault();
+                continueButton.focus();
+            } else if (!event.shiftKey && document.activeElement === continueButton) {
+                event.preventDefault();
+                prize.focus();
+            }
         }
     });
-    const banner = document.getElementById('win-banner');
-    if (banner) observer.observe(banner, { attributes: true, attributeFilter: ['class'] });
 });

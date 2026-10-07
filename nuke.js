@@ -19,6 +19,11 @@
     //          explosion particles + sounds mix with the cloud)
     //   1.70s  cloud fades, overlay removed, done
     function runMushroomAnimation(onFacesPopped, onDone) {
+        if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+            onFacesPopped();
+            onDone();
+            return;
+        }
         const overlay = document.createElement('canvas');
         overlay.id = 'nuke-overlay';
         overlay.style.cssText =
@@ -262,6 +267,7 @@
             });
         });
         ui.appendChild(btn);
+        window.dispatchEvent(new Event('resize'));
     }
 
     if (document.readyState === 'loading') {
